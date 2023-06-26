@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import uz.pdp.hospitalqueuemanagement.dto.LoginDto;
-import uz.pdp.hospitalqueuemanagement.dto.SignUpDto;
+import uz.pdp.hospitalqueuemanagement.dto.UserCreateDto;
 import uz.pdp.hospitalqueuemanagement.dto.response.JwtResponse;
 import uz.pdp.hospitalqueuemanagement.entity.RoleEntity;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntity;
@@ -29,22 +29,24 @@ public class UserService {
     private final ModelMapper modelMapper;
 
 
-    public UserEntity signUp(SignUpDto signUpDto,BindingResult bindingResult){
+    public UserEntity addUser(UserCreateDto userCreateDto, BindingResult bindingResult,RoleEntity role){
         if (bindingResult.hasErrors()){
             List<ObjectError> errors = bindingResult.getAllErrors();
             throw new RequestValidationException(errors);
         }
-        Optional<UserEntity> byUsername = userRepository.findUserEntityByUsername(signUpDto.getUsername());
-        if (byUsername.isPresent()){
-            throw new AuthorizationFailedException("Username Already Exists");
+        checkUsername(userCreateDto.getUsername());
+        UserEntity user = modelMapper.map(userCreateDto, UserEntity.class);
+        switch (role){
+            case ROLE_USER ->{
+                user.setRoles(List.of(RoleEntity.ROLE_USER));
+            }
+            case ROLE_ADMIN -> {
+                user.setRoles(List.of(RoleEntity.ROLE_ADMIN));
+            }
         }
-
-        UserEntity user = modelMapper.map(signUpDto, UserEntity.class);
         user.setStatus(UserEntityStatus.ACTIVE);
-        user.setRoles(List.of(RoleEntity.USER));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
-
     }
     public JwtResponse login(LoginDto loginDto, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -59,5 +61,11 @@ public class UserService {
             return JwtResponse.builder().accessToken(token).build();
         }
         throw new AuthorizationFailedException("Password Incorrect");
+    }
+    public void checkUsername(String username){
+        Optional<UserEntity> byUsername = userRepository.findUserEntityByUsername(username);
+        if (byUsername.isPresent()){
+            throw new AuthorizationFailedException("Username Already Exists");
+        }
     }
 }

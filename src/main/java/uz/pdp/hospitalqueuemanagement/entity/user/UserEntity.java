@@ -29,6 +29,7 @@ public class UserEntity extends BaseEntity implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private UserEntityStatus status;
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     private List<RoleEntity> roles;
 

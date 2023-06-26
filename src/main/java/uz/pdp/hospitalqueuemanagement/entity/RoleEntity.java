@@ -1,5 +1,5 @@
 package uz.pdp.hospitalqueuemanagement.entity;
 
 public enum RoleEntity {
-    USER,DOCTOR,ADMIN
+    ROLE_USER,ROLE_DOCTOR,ROLE_ADMIN
 }

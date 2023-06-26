@@ -6,8 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.hospitalqueuemanagement.dto.LoginDto;
-import uz.pdp.hospitalqueuemanagement.dto.SignUpDto;
+import uz.pdp.hospitalqueuemanagement.dto.UserCreateDto;
 import uz.pdp.hospitalqueuemanagement.dto.response.JwtResponse;
+import uz.pdp.hospitalqueuemanagement.entity.RoleEntity;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntity;
 import uz.pdp.hospitalqueuemanagement.service.authUser.UserService;
 
@@ -19,10 +20,10 @@ public class UserController {
 
     @PostMapping("/signUp")
     public ResponseEntity<UserEntity> signUp(
-            @Valid @RequestBody SignUpDto signUpDto,
+            @Valid @RequestBody UserCreateDto userCreateDto,
             BindingResult bindingResult
     ){
-        return ResponseEntity.ok(userService.signUp(signUpDto,bindingResult));
+        return ResponseEntity.ok(userService.addUser(userCreateDto,bindingResult, RoleEntity.ROLE_USER));
     }
     @GetMapping("/login")
     public ResponseEntity<JwtResponse> login(
@@ -30,5 +31,13 @@ public class UserController {
             BindingResult bindingResult
     ){
         return ResponseEntity.ok(userService.login(loginDto,bindingResult));
+    }
+
+    @PostMapping("/addAdmin")
+    public ResponseEntity<UserEntity> addAdmin(
+            @Valid @RequestBody UserCreateDto userCreateDto,
+            BindingResult bindingResult
+    ){
+        return ResponseEntity.ok(userService.addUser(userCreateDto,bindingResult,RoleEntity.ROLE_ADMIN));
     }
 }
