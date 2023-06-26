@@ -2,6 +2,7 @@ package uz.pdp.hospitalqueuemanagement.service.authUser;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -19,6 +20,7 @@ import uz.pdp.hospitalqueuemanagement.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -62,10 +64,43 @@ public class UserService {
         }
         throw new AuthorizationFailedException("Password Incorrect");
     }
-    public void checkUsername(String username){
+
+    public List<UserEntity> getAll(){
+        return userRepository.getAll(List.of(RoleEntity.ROLE_USER));
+    }
+
+    public UserEntity getUser(UUID userId){
+        return userRepository.findById(userId)
+                .orElseThrow(()-> new DataNotFoundException("User Not Found"));
+    }
+
+    public UserEntity getUser(String username){
+        return userRepository.findUserEntityByUsername(username)
+                .orElseThrow(() -> new DataNotFoundException("User Not Found"));
+    }
+
+    public HttpStatus updateStatus(UserEntityStatus status,UUID userId){
+        checkId(userId);
+        userRepository.update(status,userId);
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus delete(UUID userId){
+        checkId(userId);
+        userRepository.deleteById(userId);
+        return HttpStatus.OK;
+    }
+    private void checkUsername(String username){
         Optional<UserEntity> byUsername = userRepository.findUserEntityByUsername(username);
         if (byUsername.isPresent()){
             throw new AuthorizationFailedException("Username Already Exists");
+        }
+    }
+
+    private void checkId(UUID userId){
+        Optional<UserEntity> user = userRepository.findById(userId);
+        if(user.isEmpty()){
+            throw new DataNotFoundException("User Not Found");
         }
     }
 }

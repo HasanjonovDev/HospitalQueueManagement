@@ -2,6 +2,10 @@ package uz.pdp.hospitalqueuemanagement.service.dr;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -12,11 +16,14 @@ import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntity;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityStatus;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityType;
 import uz.pdp.hospitalqueuemanagement.exception.AuthorizationFailedException;
+import uz.pdp.hospitalqueuemanagement.exception.DataNotFoundException;
 import uz.pdp.hospitalqueuemanagement.exception.RequestValidationException;
 import uz.pdp.hospitalqueuemanagement.repository.DrRepository;
 
+
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,10 +62,44 @@ public class DrService {
         drEntity.setPassword(passwordEncoder.encode(drEntity.getPassword()));
         return drRepository.save(drEntity);
     }
-    public void checkUsername(String username){
+
+    public List<DrEntity> getAll(int page,int size){
+        Sort sort = Sort.by(Sort.Direction.ASC,"status");
+        Pageable pageable = PageRequest.of(page,size,sort);
+        return drRepository.findAll(pageable).getContent();
+    }
+
+    public DrEntity getDr(String username){
+        return drRepository.findDrEntityByUsername(username)
+                .orElseThrow(()-> new DataNotFoundException("Doctor Not Found"));
+    }
+
+    public DrEntity getDr(UUID id){
+        return drRepository.findById(id)
+                .orElseThrow(()-> new DataNotFoundException("Doctor Not Found"));
+    }
+
+    public HttpStatus updateStatus(UUID drId,DrEntityStatus status){
+        checkId(drId);
+        drRepository.update(status,drId);
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus delete(UUID drId){
+        checkId(drId);
+        drRepository.deleteById(drId);
+        return HttpStatus.OK;
+    }
+    private void checkUsername(String username){
         Optional<DrEntity> byUsername = drRepository.findDrEntityByUsername(username);
         if (byUsername.isPresent()){
             throw new AuthorizationFailedException("Username Already Exists");
+        }
+    }
+    private void checkId(UUID id){
+        Optional<DrEntity> byId = drRepository.findById(id);
+        if (byId.isEmpty()){
+            throw new DataNotFoundException("Doctor Not Found");
         }
     }
 }
