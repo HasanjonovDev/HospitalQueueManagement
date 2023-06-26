@@ -1,4 +1,4 @@
-package uz.pdp.hospitalqueuemanagement.service.auth;
+package uz.pdp.hospitalqueuemanagement.service.authUser;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -19,13 +19,13 @@ public class JwtService {
     @Value("${jwt.secret.key}")
     private String secretKey;
     @Value("${jwt.access.expiry}")
-    private String accessTokenExpiry;
+    private long accessTokenExpiry;
     public String generateAccessToken(UserEntity userEntity) {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512,secretKey)
                 .setSubject(userEntity.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + accessTokenExpiry))
+                .setExpiration(new Date(new Date().getTime()+accessTokenExpiry))
                 .addClaims(Map.of("roles", getRoles(userEntity.getAuthorities())))
                 .compact();
     }
