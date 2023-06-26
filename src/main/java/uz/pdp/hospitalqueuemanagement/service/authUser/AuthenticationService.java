@@ -1,6 +1,5 @@
-package uz.pdp.hospitalqueuemanagement.service.auth;
+package uz.pdp.hospitalqueuemanagement.service.authUser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

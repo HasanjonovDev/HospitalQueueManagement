@@ -1,4 +1,4 @@
-package uz.pdp.hospitalqueuemanagement.service.auth;
+package uz.pdp.hospitalqueuemanagement.service.authUser;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

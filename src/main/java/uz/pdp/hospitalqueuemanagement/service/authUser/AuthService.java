@@ -1,4 +1,4 @@
-package uz.pdp.hospitalqueuemanagement.service.auth;
+package uz.pdp.hospitalqueuemanagement.service.authUser;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
