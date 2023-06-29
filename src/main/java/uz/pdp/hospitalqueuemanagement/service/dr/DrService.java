@@ -15,7 +15,7 @@ import uz.pdp.hospitalqueuemanagement.entity.RoleEntity;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntity;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityStatus;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityType;
-import uz.pdp.hospitalqueuemanagement.exception.AuthorizationFailedException;
+import uz.pdp.hospitalqueuemanagement.exception.BadRequestException;
 import uz.pdp.hospitalqueuemanagement.exception.DataNotFoundException;
 import uz.pdp.hospitalqueuemanagement.exception.RequestValidationException;
 import uz.pdp.hospitalqueuemanagement.repository.DrRepository;
@@ -93,7 +93,7 @@ public class DrService {
     private void checkUsername(String username){
         Optional<DrEntity> byUsername = drRepository.findDrEntityByUsername(username);
         if (byUsername.isPresent()){
-            throw new AuthorizationFailedException("Username Already Exists");
+            throw new BadRequestException("Username Already Exists");
         }
     }
     private void checkId(UUID id){

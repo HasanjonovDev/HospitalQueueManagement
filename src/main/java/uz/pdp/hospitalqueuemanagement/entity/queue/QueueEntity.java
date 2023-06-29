@@ -20,4 +20,5 @@ public class QueueEntity extends BaseEntity {
     private Long queueNumber;
     @ManyToOne
     private DrEntity doctor;
+    private QueueEntityStatus status;
 }
