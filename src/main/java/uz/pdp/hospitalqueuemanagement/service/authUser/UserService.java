@@ -13,7 +13,7 @@ import uz.pdp.hospitalqueuemanagement.dto.response.JwtResponse;
 import uz.pdp.hospitalqueuemanagement.entity.RoleEntity;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntity;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntityStatus;
-import uz.pdp.hospitalqueuemanagement.exception.AuthorizationFailedException;
+import uz.pdp.hospitalqueuemanagement.exception.BadRequestException;
 import uz.pdp.hospitalqueuemanagement.exception.DataNotFoundException;
 import uz.pdp.hospitalqueuemanagement.exception.RequestValidationException;
 import uz.pdp.hospitalqueuemanagement.repository.UserRepository;
@@ -62,7 +62,7 @@ public class UserService {
             String token = jwtService.generateAccessToken(user);
             return JwtResponse.builder().accessToken(token).build();
         }
-        throw new AuthorizationFailedException("Password Incorrect");
+        throw new BadRequestException("Password Incorrect");
     }
 
     public List<UserEntity> getAll(){
@@ -93,7 +93,7 @@ public class UserService {
     private void checkUsername(String username){
         Optional<UserEntity> byUsername = userRepository.findUserEntityByUsername(username);
         if (byUsername.isPresent()){
-            throw new AuthorizationFailedException("Username Already Exists");
+            throw new BadRequestException("Username Already Exists");
         }
     }
 
