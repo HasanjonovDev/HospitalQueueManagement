@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @Repository
 public interface QueueRepository extends JpaRepository<QueueEntity, UUID> {
     @Query("select max(q.queueNumber) from queues q")
@@ -24,10 +25,21 @@ public interface QueueRepository extends JpaRepository<QueueEntity, UUID> {
     @Query("update queues set status = :status where id = :id")
     void update(@Param("status") QueueEntityStatus status, @Param("id") UUID id);
 
+    @Modifying
+    @Transactional
+    @Query("update queues set user =:receiver where user = :sender")
+    void transfer(@Param("receiver") UserEntity rec,@Param("sender") UserEntity sen);
+
+    @Modifying
+    @Transactional
+    @Query("update queues set user = :user where id = :id")
+    void updateUser(@Param("user") UserEntity sender,@Param("id") UUID id);
+
     @Query("select q from queues q where q.user.id = :id and q.status = 0")
     Optional<QueueEntity> getActiveQueue(@Param("id")UUID userId);
 
-    List<QueueEntity> getAllByStatus(QueueEntityStatus status);
+    List<QueueEntity> findQueueEntitiesByStatus(QueueEntityStatus status);
 
     List<QueueEntity> findQueueEntitiesByUser(UserEntity user);
+
 }
