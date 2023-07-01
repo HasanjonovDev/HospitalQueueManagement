@@ -8,13 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import uz.pdp.hospitalqueuemanagement.dto.queue.DrTypeDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueCreateDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueTransferDto;
+import uz.pdp.hospitalqueuemanagement.dto.response.LastQueueResponse;
 import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntity;
+import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityType;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntity;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntityStatus;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntity;
-import uz.pdp.hospitalqueuemanagement.entity.user.UserEntityStatus;
 import uz.pdp.hospitalqueuemanagement.exception.BadRequestException;
 import uz.pdp.hospitalqueuemanagement.exception.DataNotFoundException;
 import uz.pdp.hospitalqueuemanagement.exception.RequestValidationException;
@@ -81,10 +83,38 @@ public class QueueService {
         return queueRepository.findQueueEntitiesByUser(user);
     }
 
+    public List<QueueEntity> getDoctorQueues(UUID doctorId){
+        DrEntity drEntity = drRepository.findById(doctorId)
+                .orElseThrow(() -> new DataNotFoundException("Doctor not found"));
+        return queueRepository.getDoctorQueues(drEntity.getId());
+    }
     public QueueEntity getById(UUID queueId){
         return queueRepository.findById(queueId)
                 .orElseThrow(() -> new DataNotFoundException("Queue not found"));
     }
+
+    public LastQueueResponse getLastByDrType(DrTypeDto drTypeDto, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            List<ObjectError> errors = bindingResult.getAllErrors();
+            throw new RequestValidationException(errors);
+        }
+        LastQueueResponse lastQueueResponse = new LastQueueResponse();
+        try{
+            DrEntityType drEntityType = DrEntityType.valueOf(drTypeDto.getDrType());
+            Long queue = queueRepository.lastQueueByType(drEntityType)
+                    .orElse(0L);
+            if (queue!=0){
+                lastQueueResponse.setMessage("Active Queues: "+queue);
+            }else {
+                lastQueueResponse.setMessage("Active Queues not found");
+            }
+        }catch (Exception e){
+            throw new BadRequestException("Doctor type is wrong");
+        }
+
+        return lastQueueResponse;
+    }
+
 
     public HttpStatus cancelQueue(UUID queueId){
         QueueEntity queueEntity = queueRepository.findById(queueId)
@@ -138,7 +168,6 @@ public class QueueService {
         Long lastQueue = queueRepository.lastQueue()
                 .orElse(firstQueue);
         newQueue.setQueueNumber(++lastQueue);
-        userRepository.update(UserEntityStatus.IN_RECEPTION,newQueue.getUser().getId());
         return queueRepository.save(newQueue);
     }
 }
