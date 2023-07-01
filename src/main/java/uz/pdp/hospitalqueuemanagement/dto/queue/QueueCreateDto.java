@@ -1,4 +1,4 @@
-package uz.pdp.hospitalqueuemanagement.dto;
+package uz.pdp.hospitalqueuemanagement.dto.queue;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
