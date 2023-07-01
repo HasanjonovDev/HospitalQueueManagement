@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import uz.pdp.hospitalqueuemanagement.entity.dr.DrEntityType;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntity;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntityStatus;
 import uz.pdp.hospitalqueuemanagement.entity.user.UserEntity;
@@ -19,6 +20,9 @@ import java.util.UUID;
 public interface QueueRepository extends JpaRepository<QueueEntity, UUID> {
     @Query("select max(q.queueNumber) from queues q")
     Optional<Long> lastQueue();
+
+    @Query("select max(q.queueNumber) from queues q where q.doctor.type = :type and q.status = 0" )
+    Optional<Long> lastQueueByType(@Param("type")DrEntityType drEntityType);
 
     @Modifying
     @Transactional
@@ -37,6 +41,9 @@ public interface QueueRepository extends JpaRepository<QueueEntity, UUID> {
 
     @Query("select q from queues q where q.user.id = :id and q.status = 0")
     Optional<QueueEntity> getActiveQueue(@Param("id")UUID userId);
+
+    @Query("select q from queues q where q.doctor.id =:id")
+    List<QueueEntity> getDoctorQueues(@Param("id") UUID id);
 
     List<QueueEntity> findQueueEntitiesByStatus(QueueEntityStatus status);
 

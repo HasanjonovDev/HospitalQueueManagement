@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import uz.pdp.hospitalqueuemanagement.dto.queue.DrTypeDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueCreateDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueTransferDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.UpdateQueueDto;
+import uz.pdp.hospitalqueuemanagement.dto.response.LastQueueResponse;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntity;
 import uz.pdp.hospitalqueuemanagement.entity.queue.QueueEntityStatus;
 import uz.pdp.hospitalqueuemanagement.service.queue.QueueService;
@@ -58,6 +60,15 @@ public class QueueController {
         return queueService.transfer(queueTransferDto,bindingResult);
     }
 
+    @GetMapping("/get/lastByDrType")
+    public LastQueueResponse getLastByDrType(
+            @Valid @RequestBody DrTypeDto drTypeDto,
+            BindingResult bindingResult
+    ){
+        return queueService.getLastByDrType(drTypeDto,bindingResult);
+    }
+
+
     @GetMapping("/get/all")
     @PreAuthorize(value = "hasRole('ADMIN')")
     public ResponseEntity<List<QueueEntity>> getAll(
@@ -81,6 +92,14 @@ public class QueueController {
             @RequestParam UUID userId
     ){
         return ResponseEntity.ok(queueService.getUserQueues(userId));
+    }
+
+    @GetMapping("/get/doctorQueues")
+    @PreAuthorize(value = "hasAnyRole('ADMIN','DOCTOR')")
+    public ResponseEntity<List<QueueEntity>> getDoctorQueues(
+            @RequestParam UUID doctorId
+    ){
+        return ResponseEntity.ok(queueService.getDoctorQueues(doctorId));
     }
 
     @GetMapping("/get/byId")
