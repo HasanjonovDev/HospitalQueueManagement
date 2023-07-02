@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import uz.pdp.hospitalqueuemanagement.dto.queue.DrTypeDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueCreateDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.QueueTransferDto;
 import uz.pdp.hospitalqueuemanagement.dto.queue.UpdateQueueDto;
@@ -60,12 +59,12 @@ public class QueueController {
         return queueService.transfer(queueTransferDto,bindingResult);
     }
 
-    @GetMapping("/get/lastByDrType")
-    public LastQueueResponse getLastByDrType(
-            @Valid @RequestBody DrTypeDto drTypeDto,
-            BindingResult bindingResult
+    @GetMapping("/get/lastByDrId")
+    @PreAuthorize(value = "hasAnyRole('ADMIN','USER')")
+    public ResponseEntity<LastQueueResponse> getLastByDrId(
+            @RequestParam UUID drId
     ){
-        return queueService.getLastByDrType(drTypeDto,bindingResult);
+        return ResponseEntity.ok(queueService.getLastByDrID(drId));
     }
 
 
